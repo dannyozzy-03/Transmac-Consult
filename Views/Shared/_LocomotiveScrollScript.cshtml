@@ -18,6 +18,9 @@
                 }
             });
             
+            // Expose globally for scroll indicator
+            window.locomotiveScroll = locoScroll;
+            
             // Handle window resize
             window.addEventListener('resize', () => {
                 locoScroll.update();

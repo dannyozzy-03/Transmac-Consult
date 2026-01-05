@@ -1720,13 +1720,20 @@ footer::before {
 
 /* Offices Section */
 .offices-section {
-    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
 }
 
 .offices-section .card {
-    background: linear-gradient(135deg, #ffffff 0%, #fdf2f8 100%);
-    border-left: 4px solid #db2777;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-left: 4px solid #3b82f6;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.offices-section .card:hover {
+    transform: translateY(0) scale(1);\n    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);\n    border-left-width: 6px;\n}
 
 /* Contact Section */
 .contact-section {

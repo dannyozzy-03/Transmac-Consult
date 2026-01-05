@@ -568,14 +568,18 @@
     }
 
     @@media (max-width: 768px) {
+        .np-overview-section {
+            padding: 80px 20px 100px;
+        }
+
         .np-projects-container {
-            padding: 60px 24px;
+            padding: 60px 20px;
         }
 
         .np-project-section {
             grid-template-columns: 1fr;
-            gap: 40px;
-            margin-bottom: 120px;
+            gap: 32px;
+            margin-bottom: 80px;
         }
 
         /* Reset order for mobile - image always on top */
@@ -594,27 +598,59 @@
         }
 
         .np-project-content h2 {
-            font-size: 1.875rem;
-            margin-bottom: 24px;
+            font-size: 1.75rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .np-project-label {
+            font-size: 0.7rem;
+            margin-bottom: 12px;
         }
 
         .np-project-list {
-            margin-bottom: 32px !important;
+            margin-bottom: 24px !important;
         }
 
         .np-project-list li {
-            font-size: 0.9375rem !important;
-            margin-bottom: 12px !important;
+            font-size: 0.875rem !important;
+            margin-bottom: 10px !important;
+            line-height: 1.4 !important;
         }
     }
 
     @@media (max-width: 640px) {
+        .np-overview-section {
+            padding: 60px 16px 80px;
+        }
+
         .np-overview-cards {
             grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .np-overview-card {
+            padding: 32px 24px;
         }
 
         .np-card-content ul {
             grid-template-columns: 1fr;
+        }
+
+        .np-projects-container {
+            padding: 40px 16px;
+        }
+
+        .np-project-section {
+            margin-bottom: 60px;
+        }
+
+        .np-project-content h2 {
+            font-size: 1.5rem;
+            line-height: 1.25;
         }
     }
 
@@ -1243,6 +1279,7 @@
 
 <!-- Shared Floating Contact Button with Popup -->
 @await Html.PartialAsync("_ContactButton")
+@await Html.PartialAsync("_ScrollIndicator")
 
 @section Scripts {
     <!-- Locomotive Scroll Library -->
@@ -1265,20 +1302,45 @@
                 }
             });
 
+            // Expose globally for scroll indicator
+            window.locomotiveScroll = scroll;
+
             // Update scroll on window resize
             window.addEventListener('resize', () => {
                 scroll.update();
             });
 
-            // Expandable card functionality on hover
+            // Expandable card functionality with both hover and click
             const cards = document.querySelectorAll('.np-overview-card');
             cards.forEach(card => {
+                const expandIcon = card.querySelector('.np-expand-icon');
+                
+                // Desktop: expand on hover
                 card.addEventListener('mouseenter', function() {
-                    this.classList.add('expanded');
+                    if (window.innerWidth > 768) {
+                        this.classList.add('expanded');
+                    }
                 });
                 
                 card.addEventListener('mouseleave', function() {
-                    this.classList.remove('expanded');
+                    if (window.innerWidth > 768) {
+                        this.classList.remove('expanded');
+                    }
+                });
+                
+                // Mobile & Desktop: toggle on click
+                card.addEventListener('click', function(e) {
+                    // Only toggle if clicking the card or the expand icon
+                    this.classList.toggle('expanded');
+                    e.stopPropagation();
+                });
+                
+                // Prevent card click when clicking content links
+                const links = card.querySelectorAll('a');
+                links.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                    });
                 });
             });
             

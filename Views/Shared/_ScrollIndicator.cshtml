@@ -1,0 +1,291 @@
+@* Modern Scroll Down Indicator *@
+<style>
+    .modern-scroll-indicator {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1100;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        opacity: 1;
+        transition: all 0.5s ease;
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+    .modern-scroll-indicator.hidden {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .scroll-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1d1d1f;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
+        transition: color 0.3s ease;
+    }
+
+    .modern-scroll-indicator:hover .scroll-text {
+        color: #3b82f6;
+    }
+
+    .scroll-arrow-icon {
+        width: 30px;
+        height: 50px;
+        border: 2.5px solid #1d1d1f;
+        border-radius: 20px;
+        position: relative;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .modern-scroll-indicator:hover .scroll-arrow-icon {
+        border-color: #3b82f6;
+        box-shadow: 0 6px 30px rgba(59, 130, 246, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .scroll-arrow-icon::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 8px;
+        background: #1d1d1f;
+        border-radius: 2px;
+        animation: scrollDot 2s infinite;
+        transition: background 0.3s ease;
+    }
+
+    .modern-scroll-indicator:hover .scroll-arrow-icon::before {
+        background: #3b82f6;
+    }
+
+    .scroll-arrow-icon::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(0deg);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid #1d1d1f;
+        transition: border-color 0.3s ease;
+    }
+
+    .modern-scroll-indicator:hover .scroll-arrow-icon::after {
+        border-top-color: #3b82f6;
+    }
+
+    /* Scroll to Top State */
+    .modern-scroll-indicator.scroll-to-top .scroll-arrow-icon::before {
+        animation: scrollDotUp 2s infinite;
+        top: auto;
+        bottom: 8px;
+    }
+
+    .modern-scroll-indicator.scroll-to-top .scroll-arrow-icon::after {
+        bottom: auto;
+        top: 8px;
+        transform: translateX(-50%) rotate(180deg);
+    }
+
+    @@keyframes scrollDot {
+        0% {
+            top: 8px;
+            opacity: 1;
+        }
+        50% {
+            top: 24px;
+            opacity: 0.5;
+        }
+        100% {
+            top: 8px;
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scrollDotUp {
+        0% {
+            bottom: 8px;
+            opacity: 1;
+        }
+        50% {
+            bottom: 24px;
+            opacity: 0.5;
+        }
+        100% {
+            bottom: 8px;
+            opacity: 1;
+        }
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .modern-scroll-indicator {
+            bottom: 140px;
+            right: 20px;
+            z-index: 1100;
+        }
+
+        .scroll-text {
+            font-size: 0.75rem;
+        }
+
+        .scroll-arrow-icon {
+            width: 26px;
+            height: 44px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .modern-scroll-indicator {
+            bottom: 180px;
+            right: 15px;
+        }
+    }
+</style>
+
+<div class="modern-scroll-indicator" id="modernScrollIndicator">
+    <span class="scroll-text" id="scrollText">Scroll</span>
+    <div class="scroll-arrow-icon"></div>
+</div>
+
+<script>
+    // Wait for Locomotive Scroll to initialize
+    setTimeout(function() {
+        const scrollIndicator = document.getElementById('modernScrollIndicator');
+        const scrollText = document.getElementById('scrollText');
+        
+        if (scrollIndicator) {
+            let locoScroll = null;
+            
+            // Try to get Locomotive Scroll instance
+            function getLocoScroll() {
+                // Check if locomotive scroll is available on window
+                if (window.locomotiveScroll) {
+                    return window.locomotiveScroll;
+                }
+                // Check if it's in the global scope
+                if (typeof LocomotiveScroll !== 'undefined') {
+                    const container = document.querySelector('[data-scroll-container]');
+                    if (container && container.locomotiveScroll) {
+                        return container.locomotiveScroll;
+                    }
+                }
+                return null;
+            }
+            
+            function checkScroll() {
+                locoScroll = locoScroll || getLocoScroll();
+                
+                let scrollTop, windowHeight, documentHeight;
+                
+                if (locoScroll) {
+                    // Using Locomotive Scroll
+                    scrollTop = locoScroll.scroll.instance.scroll.y || 0;
+                    windowHeight = window.innerHeight;
+                    const container = document.querySelector('[data-scroll-container]');
+                    documentHeight = container ? container.scrollHeight : document.documentElement.scrollHeight;
+                } else {
+                    // Using regular scroll
+                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    windowHeight = window.innerHeight;
+                    documentHeight = document.documentElement.scrollHeight;
+                }
+                
+                // Always show the button
+                scrollIndicator.classList.remove('hidden');
+                
+                // Check if scrolled down more than 300px - show scroll to top
+                if (scrollTop > 300) {
+                    scrollIndicator.classList.add('scroll-to-top');
+                    scrollText.textContent = 'Top';
+                } else {
+                    // At top - show scroll down
+                    scrollIndicator.classList.remove('scroll-to-top');
+                    scrollText.textContent = 'Scroll';
+                }
+            }
+            
+            // Click handler - scroll to top when scrolled down, scroll down when at top
+            scrollIndicator.addEventListener('click', function() {
+                locoScroll = locoScroll || getLocoScroll();
+                
+                let scrollTop;
+                if (locoScroll) {
+                    scrollTop = locoScroll.scroll.instance.scroll.y || 0;
+                } else {
+                    scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                }
+                
+                if (scrollTop > 300) {
+                    // Scroll to top
+                    if (locoScroll) {
+                        locoScroll.scrollTo(0, {
+                            duration: 1200,
+                            easing: [0.25, 0.0, 0.35, 1.0]
+                        });
+                    } else {
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    }
+                } else {
+                    // Scroll down one viewport
+                    const scrollAmount = window.innerHeight * 0.9;
+                    if (locoScroll) {
+                        const currentScroll = locoScroll.scroll.instance.scroll.y || 0;
+                        locoScroll.scrollTo(currentScroll + scrollAmount, {
+                            duration: 800,
+                            easing: [0.25, 0.0, 0.35, 1.0]
+                        });
+                    } else {
+                        window.scrollBy({
+                            top: scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+            
+            // Listen to scroll events
+            window.addEventListener('scroll', checkScroll);
+            
+            // For Locomotive Scroll - try multiple times to attach listener
+            let attempts = 0;
+            const attachLocoListener = setInterval(function() {
+                attempts++;
+                locoScroll = getLocoScroll();
+                
+                if (locoScroll) {
+                    locoScroll.on('scroll', checkScroll);
+                    clearInterval(attachLocoListener);
+                } else if (attempts > 20) {
+                    // Stop trying after 20 attempts (4 seconds)
+                    clearInterval(attachLocoListener);
+                }
+            }, 200);
+            
+            // Initial check
+            setTimeout(checkScroll, 500);
+        }
+    }, 100);
+</script>
+            checkScroll();
+        }
+    });
+</script>
